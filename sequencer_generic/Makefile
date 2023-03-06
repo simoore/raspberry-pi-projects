@@ -13,13 +13,18 @@ CFILES= seqgenex0.c seqgen.c seqgen2.c
 SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.c=.o}
 
-all:	seqgenex0 seqgen seqgen2 clock_times
+all:	seqgenex0 seqgen seqgen2 seqgen3 seqgen3v2 clock_times
 
 clean:
-	-rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.d
-	-rm -f $(BUILD_DIR)/seqgenex0 $(BUILD_DIR)/seqgen $(BUILD_DIR)/seqgen2 $(BUILD_DIR)/clock_times
+	-rm -f $(BUILD_DIR)/*
 
 seqgenex0: seqgenex0.o
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(BUILD_DIR)/$@ $(BUILD_DIR)/$@.o -lpthread -lrt
+
+seqgen3: seqgen3.o
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(BUILD_DIR)/$@ $(BUILD_DIR)/$@.o -lpthread -lrt
+
+seqgen3v2: seqgen3v2.o
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(BUILD_DIR)/$@ $(BUILD_DIR)/$@.o -lpthread -lrt
 
 seqgen2: seqgen2.o
