@@ -24,6 +24,7 @@ may have to create the folder and file.
 
 * <https://github.com/siewertsmooc/RTES-ECEE-5623>
 * <https://wiki.linuxfoundation.org/realtime/start>
+* [SimSo - Simulation of Multiprocessor Scheduling with Overheads](https://github.com/MaximeCheramy/simso)
 
 ### Posix Threads
 
