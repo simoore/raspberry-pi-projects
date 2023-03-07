@@ -23,9 +23,14 @@ may have to create the folder and file.
 ## Links
 
 * <https://github.com/siewertsmooc/RTES-ECEE-5623>
+* <https://wiki.linuxfoundation.org/realtime/start>
 
 ### Posix Threads
 
 * <https://hpc-tutorials.llnl.gov/posix/>
 * <https://www.cs.cmu.edu/afs/cs/academic/class/15492-f07/www/pthreads.html>
 * <https://randu.org/tutorials/threads/>
+
+### ARM Synchronization
+
+* <https://developer.arm.com/documentation/dht0008/a/arm-synchronization-primitives/practical-uses/implementing-a-semaphore>
