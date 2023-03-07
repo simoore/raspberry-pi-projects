@@ -28,6 +28,7 @@ may have to create the folder and file.
 * [Writing a Linux Kernel Module — Part 1: Introduction](http://derekmolloy.ie/writing-a-linux-kernel-module-part-1-introduction/)
 * [Writing a Linux Kernel Module — Part 2: A Character Device](http://derekmolloy.ie/writing-a-linux-kernel-module-part-2-a-character-device/)
 * [Writing a Linux Kernel Module — Part 3: Buttons and LEDs](http://derekmolloy.ie/kernel-gpio-programming-buttons-and-leds/)
+* [Getting Started With XRDP On Raspberry Pi](https://raspberrytips.com/xrdp-on-raspberry-pi/)
 
 ### Posix Threads
 
