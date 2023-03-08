@@ -1,6 +1,6 @@
 ---
+AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
-BasedOnStyle: Chromium
 ColumnLimit: 120
 IndentCaseLabels: false
 IndentWidth: 4

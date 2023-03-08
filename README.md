@@ -19,6 +19,11 @@ may have to create the folder and file.
 * `lscpu` shows information about the CPU
 * `htop` shows process and system resourse usage
 * `vcgencmd measure_temp` to measure the tempeature of the board
+* `v4l2-ctl --list-devices` shows which device is mapped to the camera
+* `iostat` to monitor IO usage
+* `free -m` to monitor memory usage
+
+A user must be part of the video group to use the camera.
 
 ## Links
 
