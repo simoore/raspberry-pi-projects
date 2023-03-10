@@ -7,38 +7,39 @@
 //
 // Either way, the queue and dequeue should be ZERO copy.
 //
+#include <iostream>
+#include <mqueue.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <syslog.h>
 #include <tuple>
-#include <pthread.h>
-#include <iostream>
-
-#include <mqueue.h>
-#include <pthread.h>
 #include <unistd.h>
 
 #include "camera.hpp"
 #include "popl.hpp"
+#include "image_processor.hpp"
+
+static Camera sCamera;
+static ImageProcessor sProcessor;
 
 // On Linux the file systems slash is needed
-#define SNDRCV_MQ "/send_receive_mq"
+// #define SNDRCV_MQ "/send_receive_mq"
 
-#define MAX_MSG_SIZE 128
-#define ERROR (-1)
+// #define MAX_MSG_SIZE 128
+// #define ERROR (-1)
 
-struct mq_attr mq_attr;
+// struct mq_attr mq_attr;
 
-pthread_t th_receive, th_send; // create threads
-pthread_attr_t attr_receive, attr_send;
-struct sched_param param_receive, param_send;
+// pthread_t th_receive, th_send; // create threads
+// pthread_attr_t attr_receive, attr_send;
+// struct sched_param param_receive, param_send;
 
-static char canned_msg[] =
-    "This is a test, and only a test, in the event of real emergency, you would be instructed...."; // Message to be
-                                                                                                    // sent
-
-
+// static char canned_msg[] =
+//     "This is a test, and only a test, in the event of real emergency, you would be instructed...."; // Message to be
+//                                                                                                     // sent
 
 /* receives pointer to heap, reads it, and deallocate heap memory */
 
@@ -66,8 +67,6 @@ static char canned_msg[] =
 
 //     } while (rc != ERROR);
 // }
-
-
 
 // void main2(void) {
 //     int i = 0, rc = 0;
@@ -127,18 +126,17 @@ static char canned_msg[] =
 //     pthread_join(th_receive, NULL);
 // }
 
-// 
+//
 
-// 
+//
 
 // void *sender(void *arg) {
 //     mqd_t mymq;
 //     int prio;
 //     int rc;
 
-
 //     printf("sender - thread entry\n");
-    
+
 //     mymq = mq_open(SNDRCV_MQ, O_CREAT | O_RDWR, S_IRWXU, &mq_attr); //  ***
 
 //     /* send messages with priority=30 */
@@ -158,44 +156,91 @@ static char canned_msg[] =
 static pthread_t sSenderThread;
 static pthread_t sReceiverThread;
 
-std::tuple<std::string, bool, int> processCmdLineArgs(int argc, char **argv) {
+
+std::tuple<std::string, bool, int> processCmdLineArgs(int argc, char **argv)
+{
     using namespace popl;
     OptionParser op("Allowed options");
+
     auto deviceOpt = op.add<Value<std::string>>("d", "device", "Camera device, eg. \"/dev/video0\"", "/dev/video0");
     auto helpOpt = op.add<Switch>("h", "help", "Show help message");
     auto forceFormatOpt = op.add<Switch>("f", "format", "Force format to 640x480 GREY");
-    auto countOpt = op.add<Value<int>>("c", "count", "Number of frames to grab", 0);
+    auto countOpt = op.add<Value<int>>("c", "count", "Number of frames to grab", 3);
+
     op.parse(argc, argv);
-    if (helpOpt->is_set()) {
+    if (helpOpt->is_set())
+    {
         std::cout << op << std::endl;
     }
     return std::make_tuple(deviceOpt->value(), forceFormatOpt->is_set(), countOpt->value());
 }
 
-int main(int argc, char **argv) {
 
+void *sender(unsigned int frameCount, double fstart)
+{
+    printf("Running at 1 frame/sec\n");
+    struct timespec readDelay;
+    readDelay.tv_sec = 1;
+    readDelay.tv_nsec = 0;
+
+    unsigned int count = 0;
+
+    while (count < frameCount)
+    {
+        if (!sCamera.waitTilReady())
+        {
+            continue;
+        }
+
+        auto bufferPtr = sCamera.readFrame();
+        if (bufferPtr)
+        {
+            sProcessor.processImage(bufferPtr->mStart, bufferPtr->mSize, bufferPtr->mFmt);
+            struct timespec timeError;
+            if (nanosleep(&readDelay, &timeError) != 0)
+            {
+                perror("nanosleep");
+            }
+            else
+            {
+                double fnow = floatTime();
+                double rate = static_cast<double>(count + 1) / (fnow - fstart);
+                syslog(LOG_CRIT, "Frame read at %lf, @ %lf FPS\n", (fnow - fstart), rate);
+            }
+            ++count;
+        }
+    }
+    return nullptr;
+}
+
+
+int main(int argc, char **argv)
+{
     const auto [device, forceFormat, count] = processCmdLineArgs(argc, argv);
     std::cout << device << " " << forceFormat << " " << count << std::endl;
 
-    if (count <= 0) {
-        std::cout << "Count must be positive." << std::endl;
+    if (count <= 0)
+    {
+        printf("Count must be positive.\n");
         return 0;
     }
-    
-    static Camera sCamera(device, forceFormat);
-    sCamera.openDevice();
-    sCamera.initDevice();
 
+    sCamera.openDevice(device, forceFormat);
+    sCamera.initDevice();
     sCamera.startCapturing();
-    
+
     // Start threads
+    double fstart = floatTime();
+    sender(count, fstart);
+    double fstop = floatTime();
 
     // Wait for threads to join.
-    //pthread_join(sSenderThread, nullptr);
-    //pthread_join(sReceiverThread, nullptr);
+    // pthread_join(sSenderThread, nullptr);
+    // pthread_join(sReceiverThread, nullptr);
 
     sCamera.stopCapturing();
-    // syslog("Total capture time=%lf, for %d frames, %lf FPS\n", (fstop-fstart), CAPTURE_FRAMES+1, ((double)CAPTURE_FRAMES / (fstop-fstart)));
+    double rate = static_cast<double>(count) / (fstop - fstart);
+    printf("Total capture time=%lf, for %d frames, %lf FPS\n", (fstop - fstart), count, rate);
     sCamera.uninitDevice();
     sCamera.closeDevice();
     return 0;

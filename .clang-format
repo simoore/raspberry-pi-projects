@@ -1,8 +1,12 @@
 ---
 AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBraces: Allman
 ColumnLimit: 120
 IndentCaseLabels: false
 IndentWidth: 4
+MaxEmptyLinesToKeep: 2
 PointerAlignment: Right
+UseTab: Never
 ...

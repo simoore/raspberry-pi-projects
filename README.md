@@ -22,6 +22,7 @@ may have to create the folder and file.
 * `v4l2-ctl --list-devices` shows which device is mapped to the camera
 * `iostat` to monitor IO usage
 * `free -m` to monitor memory usage
+* `v4l2-ctl --list-formats` lists the image formats that the video devices use
 
 A user must be part of the video group to use the camera.
 
@@ -34,6 +35,7 @@ A user must be part of the video group to use the camera.
 * [Writing a Linux Kernel Module — Part 2: A Character Device](http://derekmolloy.ie/writing-a-linux-kernel-module-part-2-a-character-device/)
 * [Writing a Linux Kernel Module — Part 3: Buttons and LEDs](http://derekmolloy.ie/kernel-gpio-programming-buttons-and-leds/)
 * [Getting Started With XRDP On Raspberry Pi](https://raspberrytips.com/xrdp-on-raspberry-pi/)
+* [GCC compiler optimization for ARM-based systems](https://gist.github.com/fm4dd/c663217935dc17f0fc73c9c81b0aa845)
 
 ### Posix Threads
 

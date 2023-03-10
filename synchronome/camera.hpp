@@ -38,12 +38,10 @@ public:
     /// This class places the video buffer back on the queue after it has been used.
     struct BufferHandler
     {
-
-        BufferHandler(const BufferHandler &) = delete;
-        BufferHandler &operator=(const BufferHandler &) = delete;
+        BufferHandler() = default;
         BufferHandler(const V4l2Format &fmt, const int fd) : mFmt(fmt), mFd(fd) {}
 
-        ~BufferHandler()
+        void returnBuffer()
         {
             if (-1 == xioctl(mFd, VIDIOC_QBUF, &mBuf))
             {
@@ -53,8 +51,8 @@ public:
 
         void *mStart;
         size_t mSize;
-        const V4l2Format mFmt;
-        const int mFd;
+        V4l2Format mFmt;
+        int mFd;
         V4l2Buffer mBuf;
     };
 
