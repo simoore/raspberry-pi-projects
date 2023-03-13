@@ -101,7 +101,7 @@ static void *sender(void *args)
 
         auto bufferPtr = sCamera.readFrame();
         if (bufferPtr)
-        {   
+        {
             int rc = mq_send(mymq, reinterpret_cast<char *>(bufferPtr.get()), sizeof(Camera::BufferHandler), 30U);
             struct timespec timeError;
             if (nanosleep(&readDelay, &timeError) != 0)
@@ -144,7 +144,7 @@ static void initAndStartThread(pthread_t *thread, int priority, StartRoutine rou
 int main(int argc, char **argv)
 {
     const auto [device, forceFormat, count] = processCmdLineArgs(argc, argv);
-    
+
     sMqAttr.mq_maxmsg = 10;
     sMqAttr.mq_msgsize = sMaxMessageSize;
     sMqAttr.mq_flags = 0;

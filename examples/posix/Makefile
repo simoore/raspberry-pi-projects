@@ -6,7 +6,7 @@ CDEFS=
 CFLAGS= -O3 -g $(INCLUDE_DIRS) $(CDEFS)
 LIBS= -lpthread -lrt
 
-PRODUCT=posix_clock posix_linux_demo posix_mq signal_demo
+PRODUCT=posix_clock posix_linux_demo posix_mq signal_demo heap_mq
 
 HFILES=
 CFILES= posix_clock.c posix_linux_demo.c posix_mq.c
@@ -27,6 +27,9 @@ posix_clock:	posix_clock.o
 
 posix_mq:	posix_mq.o
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(BUILD_DIR)/$@ $(BUILD_DIR)/posix_mq.o $(LIBS)
+
+heap_mq:	heap_mq.o
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(BUILD_DIR)/$@ $(BUILD_DIR)/heap_mq.o $(LIBS)
 
 signal_demo:	signal_demo.o
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(BUILD_DIR)/$@ $(BUILD_DIR)/signal_demo.o $(LIBS)

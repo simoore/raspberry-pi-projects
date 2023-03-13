@@ -40,14 +40,7 @@ public:
     {
         BufferHandler() = default;
         BufferHandler(const V4l2Format &fmt, const int fd) : mFmt(fmt), mFd(fd) {}
-
-        void returnBuffer()
-        {
-            if (-1 == xioctl(mFd, VIDIOC_QBUF, &mBuf))
-            {
-                errnoExit("Buffer re-queueing error");
-            }
-        }
+        void returnBuffer();
 
         void *mStart;
         size_t mSize;

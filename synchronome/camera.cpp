@@ -1,9 +1,19 @@
-#include "camera.hpp"
 #include <cassert>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "camera.hpp"
+
+
+void Camera::BufferHandler::returnBuffer()
+{
+    if (-1 == xioctl(mFd, VIDIOC_QBUF, &mBuf))
+    {
+        errnoExit("Buffer re-queueing error");
+    }
+}
 
 
 void Camera::openDevice(std::string deviceName, bool forceFormat)

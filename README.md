@@ -14,6 +14,16 @@ Then login into the device `ssh steven@raspberrypi`. Then you want to copy you I
 login without a password. Copy the contents of your public key into `~/.ssh/authorized_keys` on the device. You 
 may have to create the folder and file.
 
+## gprof, gcov
+
+Add `-pg` compile flags. Run your application and it will generate a gmon.out. Execute the following command to get
+a text report: `gprof raidtest gmon.out > gprof.txt`.
+
+For gcov add the `-coverage` compile flag. Run your application and it generates a report that tells you what lines of 
+code have and have not been executed. gcov or lcov turn the generated files into a report that is human readable.
+
+Other tools profiling and tracing tools include is sysprof, kernalshark, and wireshark.
+
 ## Commands
 
 * `lscpu` shows information about the CPU
