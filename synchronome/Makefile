@@ -1,18 +1,20 @@
 BUILD_DIR=build
 CPPFLAGS=-O3 -g -mtune=cortex-a72 -mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8 -std=gnu++20
 LIBS=-lpthread -lrt
+INCLUDES=-I../third_party/popl/include
 
-SRCS=camera.cpp capture.cpp image_processor.cpp
+SRCS=camera_service.cpp camera.cpp image_saver_service.cpp image_saver.cpp main.cpp service.cpp \
+	tick_detector_service.cpp tick_detector.cpp
 OBJS=$(addprefix $(BUILD_DIR)/, $(SRCS:.cpp=.o))
 
-all: capture
+all: build/synchronome
 
 clean:
 	-rm -f $(BUILD_DIR)/*
 
-capture: $(OBJS)
-	g++ $(CFLAGS) -o $(BUILD_DIR)/$@ $^ $(LIBS) 
+build/synchronome: $(OBJS)
+	g++ $(CFLAGS) -o $@ $^ $(LIBS) 
 
 $(BUILD_DIR)/%.o: %.cpp
 	mkdir -p $(BUILD_DIR)
-	g++ -MD $(CPPFLAGS) -c -o $@ $<
+	g++ -MD $(CPPFLAGS) $(INCLUDES) -c -o $@ $<

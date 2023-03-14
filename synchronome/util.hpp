@@ -37,5 +37,5 @@ inline double floatTime()
 {
     struct timespec timeNow;
     clock_gettime(CLOCK_MONOTONIC, &timeNow);
-    return (double)timeNow.tv_sec + (double)timeNow.tv_nsec / 1000000000.0;
+    return static_cast<double>(timeNow.tv_sec) + static_cast<double>(timeNow.tv_nsec) / 1000000000.0;
 }

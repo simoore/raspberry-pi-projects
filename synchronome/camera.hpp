@@ -4,6 +4,7 @@
 #include <memory>
 #include <sys/select.h>
 
+#include "buffer_handler.hpp"
 #include "util.hpp"
 
 class Camera
@@ -33,20 +34,6 @@ public:
     {
         void *start;
         size_t size;
-    };
-
-    /// This class places the video buffer back on the queue after it has been used.
-    struct BufferHandler
-    {
-        BufferHandler() = default;
-        BufferHandler(const V4l2Format &fmt, const int fd) : mFmt(fmt), mFd(fd) {}
-        void returnBuffer();
-
-        void *mStart;
-        size_t mSize;
-        V4l2Format mFmt;
-        int mFd;
-        V4l2Buffer mBuf;
     };
 
     ///////////////////////////////////////////////////////////////////////////

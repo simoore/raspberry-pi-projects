@@ -3,9 +3,10 @@
 #include <linux/videodev2.h>
 #include <tuple>
 
+#include "service.hpp"
 #include "util.hpp"
 
-class ImageProcessor
+class ImageSaver
 {
 public:
     ///////////////////////////////////////////////////////////////////////////

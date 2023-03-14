@@ -4,11 +4,11 @@
 #include <tuple>
 #include <unistd.h>
 
-#include "image_processor.hpp"
+#include "image_saver.hpp"
 #include "util.hpp"
 
 
-void ImageProcessor::dumpPgm(const void *p, int size) const
+void ImageSaver::dumpPgm(const void *p, int size) const
 {
     double fnow = floatTime();
     // syslog(LOG_CRIT, "Start writting to flash at %lf, %d bytes\n", (fnow- mStartTime), size);
@@ -43,7 +43,7 @@ void ImageProcessor::dumpPgm(const void *p, int size) const
 }
 
 
-void ImageProcessor::dumpPpm(const void *p, int size) const
+void ImageSaver::dumpPpm(const void *p, int size) const
 {
     double fnow = floatTime();
     // syslog(LOG_CRIT, "Start writing to flash at %lf, %d bytes\n", (fnow - mStartTime), size);
@@ -78,7 +78,7 @@ void ImageProcessor::dumpPpm(const void *p, int size) const
 }
 
 
-void ImageProcessor::colorConvert(const unsigned char *pptr, int size)
+void ImageSaver::colorConvert(const unsigned char *pptr, int size)
 {
     syslog(LOG_CRIT, "Converting pixels %lf\n", floatTime() - mStartTime);
     auto yuv2rgb = [](int y, int u, int v) -> Pixel
@@ -117,7 +117,7 @@ void ImageProcessor::colorConvert(const unsigned char *pptr, int size)
 }
 
 
-void ImageProcessor::processImage(const void *p, int size, const struct v4l2_format &fmt)
+void ImageSaver::processImage(const void *p, int size, const struct v4l2_format &fmt)
 {
     // TODO: size checking,
     double fnow = floatTime();

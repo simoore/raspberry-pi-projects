@@ -7,15 +7,6 @@
 #include "camera.hpp"
 
 
-void Camera::BufferHandler::returnBuffer()
-{
-    if (-1 == xioctl(mFd, VIDIOC_QBUF, &mBuf))
-    {
-        errnoExit("Buffer re-queueing error");
-    }
-}
-
-
 void Camera::openDevice(std::string deviceName, bool forceFormat)
 {
     Stat st;
@@ -260,7 +251,7 @@ void Camera::stopCapturing(void)
 }
 
 
-std::unique_ptr<Camera::BufferHandler> Camera::readFrame(void)
+std::unique_ptr<BufferHandler> Camera::readFrame(void)
 {
     std::unique_ptr<BufferHandler> handler = std::make_unique<BufferHandler>(mFmt, mFd);
     clear(handler->mBuf);
