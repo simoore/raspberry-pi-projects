@@ -16,7 +16,7 @@ public:
 
     static constexpr unsigned int sHorRes = 640;
     static constexpr unsigned int sVerRes = 480;
-    static constexpr unsigned int sRequestBuffers = 6;
+    static constexpr unsigned int sRequestBuffers = 25;
 
     ///////////////////////////////////////////////////////////////////////////
     // PUBLIC TYPES
@@ -41,7 +41,7 @@ public:
     ///////////////////////////////////////////////////////////////////////////
 
     /// Opens the camera device and sets the file descriptor to access it.
-    void openDevice(std::string deviceName, bool forceFormat);
+    void openDevice(std::string deviceName);
 
     // The driver allocates buffers for the camera in kernal space and mmap is used to make these available in
     // userspace. This function initializes the buffers and makes handles to them available in this application.
@@ -76,7 +76,6 @@ private:
     ///////////////////////////////////////////////////////////////////////////
 
     std::string mDeviceName;
-    bool mForceFormat;
     int mFd{-1};
     unsigned int mNumBuffers{0};
     Buffer *mBuffers{nullptr};

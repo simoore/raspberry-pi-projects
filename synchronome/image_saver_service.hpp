@@ -20,6 +20,7 @@ public:
         unsigned int priority;
         unsigned int frameCount;
         const char *queue;
+        bool saveAll;
     };
 
     ///////////////////////////////////////////////////////////////////////////

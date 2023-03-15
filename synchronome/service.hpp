@@ -17,10 +17,7 @@ public:
     // PUBLIC FUNCTIONS
     ///////////////////////////////////////////////////////////////////////////
 
-    Service()
-    {
-        sem_init(&semExit, 0, 0);
-    }
+    Service() { sem_init(&mSemExit, 0, 0); }
 
     void start(StartRoutine routine, unsigned int priority, void *args);
 
@@ -28,7 +25,7 @@ public:
     void join(void) { pthread_join(mThread, nullptr); }
 
     /// Call this from main thread to tell service it should exit.
-    void flagExit(void) { sem_post(&semExit); }
+    void flagExit(void) { sem_post(&mSemExit); }
 
     /// Checks the exit semaphore to determine if it should exit.
     bool doExit();
@@ -47,5 +44,5 @@ private:
     ///////////////////////////////////////////////////////////////////////////
 
     pthread_t mThread;
-    sem_t semExit;
+    sem_t mSemExit;
 };

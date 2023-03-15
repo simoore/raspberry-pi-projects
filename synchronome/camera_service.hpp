@@ -30,7 +30,7 @@ public:
     void start(const Config &cfg);
 
     /// Initializes the camera device.
-    void startCamera(std::string deviceName, bool forceFormat);
+    void startCamera(std::string deviceName);
 
     /// De-initializes the camera device.
     void stopCamera();

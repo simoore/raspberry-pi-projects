@@ -27,7 +27,7 @@ void Service::start(StartRoutine routine, unsigned int priority, void *args)
 
 bool Service::doExit()
 {
-    int rc = sem_trywait(&semExit);
+    int rc = sem_trywait(&mSemExit);
     if (rc == -1)
     {
         if (errno == EAGAIN)

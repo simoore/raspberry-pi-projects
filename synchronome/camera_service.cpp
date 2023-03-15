@@ -1,3 +1,5 @@
+#include <syslog.h>
+
 #include "camera_service.hpp"
 
 
@@ -8,9 +10,9 @@ void CameraService::start(const Config &cfg)
 }
 
 
-void CameraService::startCamera(std::string deviceName, bool forceFormat)
+void CameraService::startCamera(std::string deviceName)
 {
-    mCamera.openDevice(deviceName, forceFormat);
+    mCamera.openDevice(deviceName);
     mCamera.initDevice();
     mCamera.startCapturing();
 }
@@ -26,10 +28,10 @@ void CameraService::stopCamera()
 
 void CameraService::service(void)
 {
-    printf("Running at 1 frame/sec\n");
+    syslog(LOG_CRIT, "CameraService: Running at 25 frame/sec\n");
     struct timespec readDelay;
-    readDelay.tv_sec = 1;
-    readDelay.tv_nsec = 0;
+    readDelay.tv_sec = 0;
+    readDelay.tv_nsec = 40000000;
     unsigned int count = 0;
 
     mqd_t mymq = mq_open(mConfig.queue, O_CREAT | O_RDWR, S_IRWXU, &mConfig.mqAttr);
@@ -59,4 +61,5 @@ void CameraService::service(void)
             ++count;
         }
     }
+    syslog(LOG_CRIT, "CameraService: exiting");
 }

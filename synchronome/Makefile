@@ -10,7 +10,7 @@ OBJS=$(addprefix $(BUILD_DIR)/, $(SRCS:.cpp=.o))
 all: build/synchronome
 
 clean:
-	-rm -f $(BUILD_DIR)/*
+	rm -f $(BUILD_DIR)/*
 
 build/synchronome: $(OBJS)
 	g++ $(CFLAGS) -o $@ $^ $(LIBS) 

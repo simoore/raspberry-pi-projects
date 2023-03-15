@@ -9,7 +9,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 static constexpr size_t sNumMessages = 40;
-static constexpr size_t sMaxMessageSize = sizeof(BufferHandler);
 static constexpr const char *sCameraQueue = "/camera_mq";
 static constexpr const char *sTickQueue = "/tick_mq";
 
@@ -25,15 +24,14 @@ static ImageSaverService sImageSaverService;
 // TOP LEVEL FUNCTIONS
 ///////////////////////////////////////////////////////////////////////////////
 
-static std::tuple<std::string, bool, int> processCmdLineArgs(int argc, char **argv)
+static std::tuple<std::string, int> processCmdLineArgs(int argc, char **argv)
 {
     using namespace popl;
     OptionParser op("Allowed options");
 
     auto deviceOpt = op.add<Value<std::string>>("d", "device", "Camera device, eg. \"/dev/video0\"", "/dev/video0");
     auto helpOpt = op.add<Switch>("h", "help", "Show help message");
-    auto forceFormatOpt = op.add<Switch>("f", "format", "Force format to 640x480 GREY");
-    auto countOpt = op.add<Value<int>>("c", "count", "Number of frames to grab", 3);
+    auto countOpt = op.add<Value<int>>("c", "count", "Number of frames to grab", 100);
 
     op.parse(argc, argv);
 
@@ -48,42 +46,52 @@ static std::tuple<std::string, bool, int> processCmdLineArgs(int argc, char **ar
         exit(EXIT_SUCCESS);
     }
 
-    return std::make_tuple(deviceOpt->value(), forceFormatOpt->is_set(), countOpt->value());
+    return std::make_tuple(deviceOpt->value(), countOpt->value());
 }
 
 
 int main(int argc, char **argv)
 {
-    const auto [device, forceFormat, count] = processCmdLineArgs(argc, argv);
+    const auto [device, count] = processCmdLineArgs(argc, argv);
 
-    sCameraService.startCamera(device, forceFormat);
+    mq_unlink(sCameraQueue);
+    mq_unlink(sTickQueue);
+    sCameraService.startCamera(device);
 
     // Service configuration.
     double startTime = floatTime();
 
-    struct mq_attr mqAttr;
-    mqAttr.mq_maxmsg = sNumMessages;
-    mqAttr.mq_msgsize = sMaxMessageSize;
-    mqAttr.mq_flags = 0;
+    struct mq_attr cameraMqAttr;
+    cameraMqAttr.mq_maxmsg = sNumMessages;
+    cameraMqAttr.mq_msgsize = sizeof(BufferHandler);
+    cameraMqAttr.mq_flags = 0;
+
+    struct mq_attr tickMqAttr;
+    tickMqAttr.mq_maxmsg = sNumMessages;
+    tickMqAttr.mq_msgsize = sizeof(RgbHandler);
+    tickMqAttr.mq_flags = 0;
 
     CameraService::Config cameraServiceCfg;
-    cameraServiceCfg.mqAttr = mqAttr;
+    cameraServiceCfg.mqAttr = cameraMqAttr;
     cameraServiceCfg.startTime = startTime;
-    cameraServiceCfg.priority = sched_get_priority_max(SCHED_FIFO);
+    cameraServiceCfg.priority = sched_get_priority_max(SCHED_FIFO) - 2;
     cameraServiceCfg.queue = sCameraQueue;
 
     TickDetectorService::Config tickDetectorServiceCfg;
-    tickDetectorServiceCfg.mqAttr = mqAttr;
-    tickDetectorServiceCfg.startTime = startTime;
+    tickDetectorServiceCfg.inMqAttr = cameraMqAttr;
+    tickDetectorServiceCfg.outMqAttr = tickMqAttr;
     tickDetectorServiceCfg.priority = sched_get_priority_max(SCHED_FIFO) - 1;
     tickDetectorServiceCfg.inQueue = sCameraQueue;
     tickDetectorServiceCfg.outQueue = sTickQueue;
+    tickDetectorServiceCfg.tickDetectorConfig.showDiff = false;
+    tickDetectorServiceCfg.tickDetectorConfig.startTime = startTime;
 
     ImageSaverService::Config imageSaverServiceCfg;
-    imageSaverServiceCfg.mqAttr = mqAttr;
+    imageSaverServiceCfg.mqAttr = tickMqAttr;
     imageSaverServiceCfg.startTime = startTime;
-    imageSaverServiceCfg.priority = sched_get_priority_max(SCHED_FIFO) - 2;
+    imageSaverServiceCfg.priority = sched_get_priority_max(SCHED_FIFO);
     imageSaverServiceCfg.frameCount = count;
+    imageSaverServiceCfg.saveAll = false;
     imageSaverServiceCfg.queue = sTickQueue;
 
     // Start services.
@@ -93,16 +101,19 @@ int main(int argc, char **argv)
 
     // Wait for the image saver service to join, then tell other services to terminate.
     sImageSaverService.join();
-    sCameraService.flagExit();
-    sTickDetectorService.flagExit();
-    sCameraService.join();
-    sTickDetectorService.join();
 
     double stopTime = floatTime();
     double total = stopTime - startTime;
     double rate = static_cast<double>(count) / total;
     syslog(LOG_CRIT, "Total capture time=%lf, for %d frames, %lf FPS\n", total, count, rate);
 
+    sCameraService.flagExit();
+    sTickDetectorService.flagExit();
+    sCameraService.join();
+    sTickDetectorService.join();
+
     sCameraService.stopCamera();
+    mq_unlink(sCameraQueue);
+    mq_unlink(sTickQueue);
     return 0;
 }

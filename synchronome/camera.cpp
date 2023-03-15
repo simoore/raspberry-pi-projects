@@ -7,11 +7,10 @@
 #include "camera.hpp"
 
 
-void Camera::openDevice(std::string deviceName, bool forceFormat)
+void Camera::openDevice(std::string deviceName)
 {
     Stat st;
     mDeviceName = deviceName;
-    mForceFormat = forceFormat;
 
     if (-1 == stat(mDeviceName.c_str(), &st))
     {
@@ -121,7 +120,6 @@ void Camera::initDevice(void)
 
     if (0 != xioctl(mFd, VIDIOC_CROPCAP, &cropcap))
     {
-        // errnoExit("Cropcap error");
     }
 
     V4l2Crop crop;
@@ -130,56 +128,37 @@ void Camera::initDevice(void)
 
     if (-1 == xioctl(mFd, VIDIOC_S_CROP, &crop))
     {
-        // switch (errno)
-        // {
-        // case EINVAL:
-        //     errnoExit("Cropping not supported");
-        //     break;
-        // default:
-        //     errnoExit("Error setting crop");
-        //     break;
-        // }
     }
 
     clear(mFmt);
     mFmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    if (mForceFormat)
+    if (-1 == xioctl(mFd, VIDIOC_G_FMT, &mFmt))
     {
-        printf("Forcing Format\n");
-        mFmt.fmt.pix.width = sHorRes;
-        mFmt.fmt.pix.height = sVerRes;
-
-        // Specify the Pixel Coding Formate here
-        mFmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV; // This one works for Logitech C200
-        // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_UYVY;
-        // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_VYUY;
-        // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
-        // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
-
-        // fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
-        mFmt.fmt.pix.field = V4L2_FIELD_NONE;
-
-        // Note VIDIOC_S_FMT may change width and height.
-        if (-1 == xioctl(mFd, VIDIOC_S_FMT, &mFmt))
-        {
-            errnoExit("VIDIOC_S_FMT");
-        }
+        errnoExit("VIDIOC_G_FMT");
     }
-    else
+    if (mFmt.fmt.pix.pixelformat != V4L2_PIX_FMT_YUYV)
     {
-        if (-1 == xioctl(mFd, VIDIOC_G_FMT, &mFmt))
-        {
-            errnoExit("VIDIOC_G_FMT");
-        }
+        printf("Expected pixel format V4L2_PIX_FMT_YUYV");
+        exit(EXIT_FAILURE);
+    }
+    if (mFmt.fmt.pix.field != V4L2_FIELD_NONE)
+    {
+        printf("Expected pixel field V4L2_FIELD_NONE");
+        exit(EXIT_FAILURE);
+    }
+    mFmt.fmt.pix.width = sHorRes;
+    mFmt.fmt.pix.height = sVerRes;
+    if (-1 == xioctl(mFd, VIDIOC_S_FMT, &mFmt))
+    {
+        errnoExit("VIDIOC_S_FMT");
     }
 
-    #define BIT(n) (0x1U << (n))
+#define BIT(n) (0x1U << (n))
     printf("Pixel format: ");
     printf(V4L2_FOURCC_CONV, V4L2_FOURCC_CONV_ARGS(mFmt.fmt.pix.pixelformat));
     printf("\nDimensions W: %d, H: %d\n", mFmt.fmt.pix.width, mFmt.fmt.pix.height);
 
-    // what is this...
     int min = mFmt.fmt.pix.width * 2;
     if (mFmt.fmt.pix.bytesperline < min)
     {

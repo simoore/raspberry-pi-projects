@@ -22,10 +22,10 @@ public:
 
     struct Config
     {
-        struct mq_attr mqAttr;
-        double startTime;
+        TickDetector::Config tickDetectorConfig;
+        struct mq_attr inMqAttr;
+        struct mq_attr outMqAttr;
         unsigned int priority;
-        unsigned int frameCount;
         const char *inQueue;
         const char *outQueue;
     };

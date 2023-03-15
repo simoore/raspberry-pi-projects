@@ -4,7 +4,7 @@
 
 #include "util.hpp"
 
-/// This class contains the information associated with a video buffer from the camera that is needed by different 
+/// This class contains the information associated with a video buffer from the camera that is needed by different
 /// parts of the application to use the information in the buffer. Call `returnBuffer` once the buffer is no longer
 /// required to send it back to the driver for re-use.
 struct BufferHandler
